@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "TRISborro",
+  "version": "1.0",
+  "description": "Simple Tic-Tac-Toe game playable in the extension popup.",
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
