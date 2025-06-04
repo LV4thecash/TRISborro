@@ -2,6 +2,10 @@ const cells = document.querySelectorAll('.cell');
 const messageEl = document.getElementById('message');
 const overlay = document.getElementById('overlay');
 const restartBtn = document.getElementById('restart');
+const scoreboardEl = document.getElementById('scoreboard');
+
+let wins = 0;
+let losses = 0;
 
 let board = Array(9).fill(null);
 let gameOver = false;
@@ -17,6 +21,7 @@ cells.forEach(cell => {
 });
 
 restartBtn.addEventListener('click', resetGame);
+updateScore();
 
 function playerMove(e) {
     const index = +e.target.dataset.index;
@@ -31,9 +36,28 @@ function playerMove(e) {
 function computerMove() {
     const emptyIndices = board.map((v,i) => v ? null : i).filter(i => i !== null);
     if (emptyIndices.length === 0) return;
-    const index = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+
+    let index;
+    if (Math.random() < 0.89) {
+        index = findBestMove('X') ?? findBestMove('O');
+    }
+    if (index === undefined) {
+        index = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+    }
     makeMove(index, 'X');
     checkGameOver();
+}
+
+function findBestMove(player) {
+    for (const pattern of winPatterns) {
+        const [a,b,c] = pattern;
+        const values = [board[a], board[b], board[c]];
+        if (values.filter(v => v === player).length === 2 && values.includes(null)) {
+            const idx = [a,b,c][values.indexOf(null)];
+            return idx;
+        }
+    }
+    return undefined;
 }
 
 function makeMove(index, player) {
@@ -62,13 +86,16 @@ function endGame(winner) {
     let text = '';
     if (winner === 'player') {
         text = 'HAI BATTUTO MARZOBOT';
+        wins++;
     } else if (winner === 'computer') {
         text = 'SEI STATO DIOPORCATO';
+        losses++;
     } else {
         text = 'PAREGGIO';
     }
     messageEl.textContent = text;
     overlay.classList.add('show');
+    updateScore();
 }
 
 function resetGame() {
@@ -79,4 +106,9 @@ function resetGame() {
     });
     overlay.classList.remove('show');
     gameOver = false;
+    updateScore();
+}
+
+function updateScore() {
+    scoreboardEl.textContent = `Vittorie: ${wins} | Sconfitte: ${losses}`;
 }
